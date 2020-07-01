@@ -7,8 +7,8 @@ ThisBuild / organizationName := "raytracing1weekend"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "raytracking-weekend",
-    libraryDependencies += scalaTest % Test
+    name := "raytracing-weekend",
+    libraryDependencies ++= runtimeDeps ++ testDeps ++ buildDeps,
+    scalacOptions ++= Seq("-Xlint"),
   )
 
-// See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.
