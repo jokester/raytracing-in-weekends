@@ -1,0 +1,29 @@
+name: Check
+
+on: [push]
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-20.04
+
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - name: Test
+      run: sbt clean coverage test coverageReport
+    - uses: codecov/codecov-action@v1
+
+    - name: Render image
+      run: sbt run
+
+    - name: Upload image
+      uses: actions/upload-artifact@v2
+      with:
+        name: out.png
+        path: out.png
