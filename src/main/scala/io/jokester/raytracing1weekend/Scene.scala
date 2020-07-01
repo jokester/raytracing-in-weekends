@@ -67,7 +67,6 @@ class Scene(focal: Double) {
         j,
         rayColor(ray)
       )
-
     }
   }
 }
