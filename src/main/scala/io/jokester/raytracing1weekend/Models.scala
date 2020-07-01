@@ -1,6 +1,35 @@
 package io.jokester.raytracing1weekend
 
-sealed trait Model {}
+case class HitRecord(hitAt: Vec3, normal: Vec3, t: Double)
 
-case class Plane(origin: Vec3, normal: Vec3)  extends Model
-case class Ball(center: Vec3, radius: Double) extends Model
+sealed trait Model {
+  def hitBy(ray: Ray, tMin: Double, tMax: Double): Option[HitRecord]
+
+}
+
+case class Sphere(center: Vec3, radius: Double) extends Model {
+  override def hitBy(ray: Ray, tMin: Double, tMax: Double): Option[HitRecord] = {
+    val oc           = ray.origin - center
+    val a            = ray.direction.squareSum
+    val b            = 2 * ray.direction.dot(oc)
+    val c            = oc.squareSum - radius * radius
+    val discriminant = b * b - 4 * a * c
+    if (discriminant < 0) {
+      None
+    } else {
+      val maybeT = Some((-b - Math.sqrt(discriminant)) / (2 * a))
+
+      maybeT
+        .filter(t => tMin <= t && t <= tMax)
+        .map(t => {
+          val hitAt = ray.at(t)
+          HitRecord(
+            hitAt,
+            hitAt - center,
+            t
+          )
+        })
+    }
+  }
+
+}
