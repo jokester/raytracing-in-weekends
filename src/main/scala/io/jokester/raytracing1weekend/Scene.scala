@@ -6,12 +6,8 @@ class Scene {
 
   private var models = List.empty[Model]
 
-  def addModel(m: Model): Unit = {
+  def addModel(m: Model): Unit = {}
 
-  }
-
-  def drawOn(canvas: Graphics2D) = {
-
-  }
+  def drawOn(canvas: Graphics2D) = {}
 
 }
