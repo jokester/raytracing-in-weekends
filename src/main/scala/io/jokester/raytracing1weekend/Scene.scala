@@ -50,6 +50,24 @@ class Scene(focal: Double) {
     val aspectRatio = canvasW.toDouble / canvasH
     val viewportH   = 2.0
     val viewportW   = viewportH * aspectRatio
-  }
 
+    val origin     = Vec3(0, 0, 0)
+    val horizontal = Vec3(viewportW, 0, 0)
+    val vertical   = Vec3(0, viewportH, 0)
+    val lowerLeft  = origin - (horizontal / 2) - (vertical / 2) - Vec3(0, 0, focal)
+
+    for (i <- 0 until canvasW; j <- 0 until canvasH) {
+      val u     = i.toDouble / (canvasW - 1) // 0 => 1
+      val v     = j.toDouble / (canvasH - 1) // 0 => 1
+      val pixel = lowerLeft + horizontal * u + vertical * v
+      val ray   = Ray(origin, pixel - origin)
+      drawPixel(
+        canvas,
+        i,
+        j,
+        rayColor(ray)
+      )
+
+    }
+  }
 }
