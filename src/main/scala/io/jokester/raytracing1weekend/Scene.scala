@@ -3,9 +3,9 @@ package io.jokester.raytracing1weekend
 import java.awt.Graphics2D
 
 class Scene(focal: Double, canvasW: Int, canvasH: Int) {
-  private var models = List.empty[Model]
+  private var models = List.empty[Hittable]
 
-  def addModel(m: Model): Unit = {}
+  def addModel(m: Hittable): Unit = {}
 
   def gradientColor(ray: Ray): Color3 = {
     val unitDir = ray.direction.unit
