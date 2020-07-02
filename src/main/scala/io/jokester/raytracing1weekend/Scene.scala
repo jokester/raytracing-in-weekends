@@ -5,9 +5,12 @@ import java.awt.Graphics2D
 class Scene(focal: Double, canvasW: Int, canvasH: Int) {
   private var models = List.empty[Hittable]
 
-  def addModel(m: Hittable): Unit = {}
+  def addModel(m: Hittable): this.type = {
+    models ::= m
+    this
+  }
 
-  def gradientColor(ray: Ray): Color3 = {
+  def gradientBackground(ray: Ray): Color3 = {
     val unitDir = ray.direction.unit
     val t       = 0.5 * (unitDir.y + 1)
     // y=1 => t = 1 => rgba(0,5, 0.7, 1)
@@ -20,21 +23,15 @@ class Scene(focal: Double, canvasW: Int, canvasH: Int) {
     )
   }
 
-  def sphereColor(ray: Ray): Option[Color3] = {
-    val sphere   = Sphere(Vec3(0, 0, -1), 0.5)
-    val maybeHit = sphere.hitBy(ray, 0, 1e6)
-    for (hit <- maybeHit)
-      yield {
-        val n = hit.normal.unit
-        Color3(
-          (n.x + 1) / 2,
-          (n.y + 1) / 2,
-          (n.z + 1) / 2
-        )
-      }
-  }
+  def rayColor(ray: Ray): Color3 = {
+    val hitWithSmallestT: Option[(HitRecord, Hittable)] = models
+      .flatMap(m => m.hitBy(ray, 0, Double.MaxValue).map(h => (h, m)))
+      .filter(_._1.t >= 0)
+      .sortBy(_._1.t)
+      .headOption
 
-  def rayColor(ray: Ray): Color3 = sphereColor(ray).getOrElse(gradientColor(ray))
+    hitWithSmallestT.map(t => t._2.colorAt(t._1)).getOrElse(gradientBackground(ray))
+  }
 
   /**
     *
