@@ -2,7 +2,7 @@ package io.jokester.raytracing1weekend
 
 import java.awt.Graphics2D
 
-class Scene(focal: Double) {
+class Scene(focal: Double, canvasW: Int, canvasH: Int) {
   private var models = List.empty[Model]
 
   def addModel(m: Model): Unit = {}
@@ -43,10 +43,10 @@ class Scene(focal: Double) {
     */
   private def drawPixel(canvas: Graphics2D, x: Int, y: Int, color: Color3): Unit = {
     canvas.setColor(color.toColor())
-    canvas.drawRect(x, y, 1, 1)
+    canvas.drawRect(x, canvasH - 1 - y, 1, 1)
   }
 
-  def drawTo(canvasW: Int, canvasH: Int, canvas: Graphics2D) = {
+  def drawTo(canvas: Graphics2D) = {
     val aspectRatio = canvasW.toDouble / canvasH
     val viewportH   = 2.0
     val viewportW   = viewportH * aspectRatio

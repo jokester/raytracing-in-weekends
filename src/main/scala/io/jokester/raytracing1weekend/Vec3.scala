@@ -25,5 +25,3 @@ object VecOperators {
     def *(v: Vec3): Vec3 = v * d
   }
 }
-
-
