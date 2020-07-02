@@ -26,6 +26,7 @@ case class Sphere(center: Vec3, radius: Double) extends Hittable {
           val hitAt = ray.at(t)
           HitRecord(
             hitAt,
+              // always point to crush
             hitAt - center,
             t
           )
