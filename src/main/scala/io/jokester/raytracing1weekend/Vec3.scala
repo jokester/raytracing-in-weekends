@@ -6,9 +6,9 @@ case class Vec3(val x: Double, val y: Double, val z: Double) {
   def *(m: Double): Vec3  = Vec3(x * m, y * m, z * m)
   def /(d: Double): Vec3  = Vec3(x / d, y / d, z / d)
 
-  def length: Double = Math.sqrt(squareSum)
+  def length: Double    = Math.sqrt(squareSum)
   def squareSum: Double = dot(this)
-  def unit: Vec3 = this / length
+  def unit: Vec3        = this / length
 
   def dot(that: Vec3): Double = x * that.x + y * that.y + z * that.z
   def cross(that: Vec3): Vec3 =
