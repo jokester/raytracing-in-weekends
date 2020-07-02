@@ -2,12 +2,15 @@ package io.jokester.raytracing1weekend
 
 import java.awt.Graphics2D
 
-class Scene(focal: Double) {
-  private var models = List.empty[Model]
+class Scene(focal: Double, canvasW: Int, canvasH: Int) {
+  private var models = List.empty[Hittable]
 
-  def addModel(m: Model): Unit = {}
+  def addModel(m: Hittable): this.type = {
+    models ::= m
+    this
+  }
 
-  def gradientColor(ray: Ray): Color3 = {
+  def gradientBackground(ray: Ray): Color3 = {
     val unitDir = ray.direction.unit
     val t       = 0.5 * (unitDir.y + 1)
     // y=1 => t = 1 => rgba(0,5, 0.7, 1)
@@ -20,21 +23,15 @@ class Scene(focal: Double) {
     )
   }
 
-  def sphereColor(ray: Ray): Option[Color3] = {
-    val sphere   = Sphere(Vec3(0, 0, -1), 0.5)
-    val maybeHit = sphere.hitBy(ray, 0, 1e6)
-    for (hit <- maybeHit)
-      yield {
-        val n = hit.normal.unit
-        Color3(
-          (n.x + 1) / 2,
-          (n.y + 1) / 2,
-          (n.z + 1) / 2
-        )
-      }
-  }
+  def rayColor(ray: Ray): Color3 = {
+    val hitWithSmallestT: Option[(HitRecord, Hittable)] = models
+      .flatMap(m => m.hitBy(ray, 0, Double.MaxValue).map(h => (h, m)))
+      .filter(_._1.t >= 0)
+      .sortBy(_._1.t)
+      .headOption
 
-  def rayColor(ray: Ray): Color3 = sphereColor(ray).getOrElse(gradientColor(ray))
+    hitWithSmallestT.map(t => t._2.colorAt(t._1)).getOrElse(gradientBackground(ray))
+  }
 
   /**
     *
@@ -43,10 +40,10 @@ class Scene(focal: Double) {
     */
   private def drawPixel(canvas: Graphics2D, x: Int, y: Int, color: Color3): Unit = {
     canvas.setColor(color.toColor())
-    canvas.drawRect(x, y, 1, 1)
+    canvas.drawRect(x, canvasH - 1 - y, 1, 1)
   }
 
-  def drawTo(canvasW: Int, canvasH: Int, canvas: Graphics2D) = {
+  def drawTo(canvas: Graphics2D) = {
     val aspectRatio = canvasW.toDouble / canvasH
     val viewportH   = 2.0
     val viewportW   = viewportH * aspectRatio
