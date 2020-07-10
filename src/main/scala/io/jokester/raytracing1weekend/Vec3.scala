@@ -1,6 +1,6 @@
 package io.jokester.raytracing1weekend
 
-case class Vec3(val x: Double, val y: Double, val z: Double) {
+case class Vec3( x: Double, val y: Double, val z: Double) {
   def +(that: Vec3): Vec3 = Vec3(x + that.x, y + that.y, z + that.z)
   def -(that: Vec3): Vec3 = Vec3(x - that.x, y - that.y, z - that.z)
   def *(m: Double): Vec3  = Vec3(x * m, y * m, z * m)

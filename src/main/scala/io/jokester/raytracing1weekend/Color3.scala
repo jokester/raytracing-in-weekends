@@ -14,3 +14,16 @@ case class Color3(r: Double, g: Double, b: Double) {
       clip(0, 1, b).toFloat
     )
 }
+
+object Color3 {
+  def mean(samples: Seq[Color3]): Color3 = {
+    val sumR = samples.map(_.r).sum
+    val sumG = samples.map(_.g).sum
+    val sumB = samples.map(_.b).sum
+    Color3(
+      sumR / samples.size,
+      sumG / samples.size,
+      sumB / samples.size
+    )
+  }
+}

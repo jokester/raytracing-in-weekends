@@ -43,6 +43,10 @@ class Scene(focal: Double, canvasW: Int, canvasH: Int) {
     canvas.drawRect(x, canvasH - 1 - y, 1, 1)
   }
 
+  private def genMsaaOffsets(t: Int): Seq[(Double, Double)] = {
+    for (x <- 0 until t; y <- 0 until t) yield ((x + 1).toDouble / t, (y + 1).toDouble / t)
+  }
+
   def drawTo(canvas: Graphics2D) = {
     val aspectRatio = canvasW.toDouble / canvasH
     val viewportH   = 2.0
@@ -53,16 +57,25 @@ class Scene(focal: Double, canvasW: Int, canvasH: Int) {
     val vertical   = Vec3(0, viewportH, 0)
     val lowerLeft  = origin - (horizontal / 2) - (vertical / 2) - Vec3(0, 0, focal)
 
-    for (i <- 0 until canvasW; j <- 0 until canvasH) {
-      val u     = i.toDouble / (canvasW - 1) // 0 => 1
-      val v     = j.toDouble / (canvasH - 1) // 0 => 1
-      val pixel = lowerLeft + horizontal * u + vertical * v
-      val ray   = Ray(origin, pixel - origin)
+    val sampleOffsets = genMsaaOffsets(2)
+
+    for (pixelI <- 0 until canvasW; pixelJ <- 0 until canvasH) {
+      val samples = sampleOffsets.map(dij => {
+        val (di, dj) = dij
+        val i        = pixelI + di
+        val j        = pixelJ + dj
+        val u        = i.toDouble / (canvasW - 1) // 0 => 1
+        val v        = j.toDouble / (canvasH - 1) // 0 => 1
+        val pixel    = lowerLeft + horizontal * u + vertical * v
+        val ray      = Ray(origin, pixel - origin)
+        rayColor(ray)
+      })
+
       drawPixel(
         canvas,
-        i,
-        j,
-        rayColor(ray)
+        pixelI,
+        pixelJ,
+        Color3.mean(samples)
       )
     }
   }
