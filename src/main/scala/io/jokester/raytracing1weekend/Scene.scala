@@ -4,7 +4,7 @@ import java.awt.Graphics2D
 
 import com.typesafe.scalalogging.LazyLogging
 
-class Scene(focal: Double, canvasW: Int, canvasH: Int) extends LazyLogging {
+class Scene(focal: Double, canvasW: Int, canvasH: Int, msaaLevel: Int) extends LazyLogging {
   private var models = List.empty[Hittable]
 
   def addModel(m: Hittable): this.type = {
@@ -65,7 +65,7 @@ class Scene(focal: Double, canvasW: Int, canvasH: Int) extends LazyLogging {
     val vertical   = Vec3(0, viewportH, 0)
     val lowerLeft  = origin - (horizontal / 2) - (vertical / 2) - Vec3(0, 0, focal)
 
-    val sampleOffsets = genMsaaOffsets(2)
+    val sampleOffsets = genMsaaOffsets(msaaLevel)
 
     for (pixelI <- 0 until canvasW; pixelJ <- 0 until canvasH) {
       val samples = sampleOffsets.map(dij => {
