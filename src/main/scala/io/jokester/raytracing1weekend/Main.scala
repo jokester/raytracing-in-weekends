@@ -40,4 +40,5 @@ object Main extends App with LazyLogging {
   }
   logger.debug(s"rendering in ${threadCount} threads done")
 
+  executionContext.shutdown()
 }
