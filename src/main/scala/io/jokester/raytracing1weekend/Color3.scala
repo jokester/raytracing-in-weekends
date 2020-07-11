@@ -13,6 +13,15 @@ case class Color3(r: Double, g: Double, b: Double) {
       clip(0, 1, g).toFloat,
       clip(0, 1, b).toFloat
     )
+
+  def gammaCorrection(gamma: Int = 2): Color3 =
+    Color3(
+      Math.exp(Math.log(r) / gamma),
+      Math.exp(Math.log(g) / gamma),
+      Math.exp(Math.log(b) / gamma)
+    )
+
+  def *(scale: Double): Color3 = copy(r * scale, g * scale, b * scale)
 }
 
 object Color3 {

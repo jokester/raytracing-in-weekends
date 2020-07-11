@@ -7,7 +7,6 @@ import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.Random
 
 case class SceneMetrics(focal: Double, canvasW: Int, canvasH: Int) {
   val aspectRatio: Double = canvasW.toDouble / canvasH
@@ -40,16 +39,25 @@ class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable]) extend
   def rayColor(ray: Ray, depth: Int): Color3 = {
     if (depth < 0) return Color3(0, 0, 0)
 
-    val hitWithSmallestT: Option[HitRecord] = world.hitBy(ray, 0, Double.MaxValue)
+    val hitWithSmallestT: Option[HitRecord] = world.hitBy(ray, 0.00001, Double.MaxValue)
 
     if (hitWithSmallestT.isEmpty) return gradientBackground(ray)
 
     hitWithSmallestT
       .map(hit => {
-        val reflectionTarget = hit.hitAt + hit.normal + Threaded.randomUnit()
-        rayColor(Ray(hit.hitAt, reflectionTarget), depth - 1)
+        rayColor(nextRay1(hit), depth - 1) * 0.5
       })
       .getOrElse(gradientBackground(ray))
+  }
+
+  def nextRay1(hit: HitRecord): Ray = {
+    val reflectionTarget = hit.hitAt + hit.normal + Threaded.randomUnit()
+    Ray(hit.hitAt, reflectionTarget - hit.hitAt)
+  }
+
+  def nextRay2(hit: HitRecord): Ray = {
+    val reflectionTarget = hit.hitAt + Threaded.randomInHemisphere(hit.normal)
+    Ray(hit.hitAt, reflectionTarget - hit.hitAt)
   }
 
   def normalColor(normal: Vec3): Color3 = {
@@ -86,7 +94,7 @@ class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable]) extend
       val ray      = Ray(metrics.origin, pixel - metrics.origin)
       rayColor(ray, 50)
     }
-    Color3.mean(samples)
+    Color3.mean(samples).gammaCorrection()
   }
 
   private def renderPixelThreaded(pixelI: Int, pixelJ: Int)(implicit
@@ -109,7 +117,7 @@ class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable]) extend
         renderPixelThreaded(pixelI, pixelJ)
       }
 
-    val pixels = Await.result(Future.sequence(pixelsF), Duration(300, TimeUnit.SECONDS))
+    val pixels = Await.result(Future.sequence(pixelsF), Duration(36000, TimeUnit.SECONDS))
 
     pixels.foreach(p => {
       val (pixelI, pixelJ, color) = p;
