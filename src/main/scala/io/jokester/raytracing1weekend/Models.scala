@@ -1,6 +1,6 @@
 package io.jokester.raytracing1weekend
 
-case class HitRecord(hitAt: Vec3, normal: Vec3, t: Double)
+case class HitRecord(hitAt: Vec3, normal: Vec3, t: Double, model: Hittable)
 
 sealed trait Hittable {
   def hitBy(ray: Ray, tMin: Double, tMax: Double): Option[HitRecord]
@@ -30,9 +30,10 @@ case class Sphere(center: Vec3, radius: Double) extends Hittable {
           HitRecord(
             hitAt,
             // always point to crush
-            // so that we can infer reflection from ray && normal
-            hitAt - center,
-            t
+            // so that we can infer reflection from (angle between ray and normal)
+            normal = hitAt - center,
+            t = t,
+            model = this
           )
         })
     }

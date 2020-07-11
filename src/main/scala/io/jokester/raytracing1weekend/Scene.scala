@@ -2,7 +2,9 @@ package io.jokester.raytracing1weekend
 
 import java.awt.Graphics2D
 
-class Scene(focal: Double, canvasW: Int, canvasH: Int) {
+import com.typesafe.scalalogging.LazyLogging
+
+class Scene(focal: Double, canvasW: Int, canvasH: Int) extends LazyLogging {
   private var models = List.empty[Hittable]
 
   def addModel(m: Hittable): this.type = {
@@ -24,13 +26,13 @@ class Scene(focal: Double, canvasW: Int, canvasH: Int) {
   }
 
   def rayColor(ray: Ray): Color3 = {
-    val hitWithSmallestT: Option[(HitRecord, Hittable)] = models
-      .flatMap(m => m.hitBy(ray, 0, Double.MaxValue).map(h => (h, m)))
-      .filter(_._1.t >= 0)
-      .sortBy(_._1.t)
+    val hitWithSmallestT: Option[HitRecord] = models
+      .flatMap(m => m.hitBy(ray, 0, Double.MaxValue))
+      .filter(_.t >= 0)
+      .sortBy(_.t)
       .headOption
 
-    hitWithSmallestT.map(t => t._2.colorAt(t._1)).getOrElse(gradientBackground(ray))
+    hitWithSmallestT.map(hit => hit.model.colorAt(hit)).getOrElse(gradientBackground(ray))
   }
 
   /**
