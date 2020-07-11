@@ -86,7 +86,7 @@ class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable]) extend
       val ray      = Ray(metrics.origin, pixel - metrics.origin)
       rayColor(ray, 50)
     }
-    Color3.mean(samples)
+    Color3.mean(samples).gammaCorrection()
   }
 
   private def renderPixelThreaded(pixelI: Int, pixelJ: Int)(implicit
