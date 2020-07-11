@@ -24,7 +24,7 @@ object Main extends App with LazyLogging {
     )
   )
 
-  private val threadCount = Runtime.getRuntime.availableProcessors()
+  private val threadCount = Math.max(1, Runtime.getRuntime.availableProcessors() / 2)
 
   private implicit val executionContext = ExecutionContext.fromExecutorService(
     Executors.newFixedThreadPool(threadCount)
