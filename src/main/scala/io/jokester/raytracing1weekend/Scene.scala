@@ -40,7 +40,7 @@ class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable]) extend
   def rayColor(ray: Ray, depth: Int): Color3 = {
     if (depth < 0) return Color3(0, 0, 0)
 
-    val hitWithSmallestT: Option[HitRecord] = world.hitBy(ray, 0, Double.MaxValue)
+    val hitWithSmallestT: Option[HitRecord] = world.hitBy(ray, 0.00001, Double.MaxValue)
 
     if (hitWithSmallestT.isEmpty) return gradientBackground(ray)
 
