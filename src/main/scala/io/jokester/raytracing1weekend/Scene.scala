@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 
 import com.typesafe.scalalogging.LazyLogging
 
-import scala.concurrent.duration.{Duration, DurationConversions}
+import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.Random
 
@@ -20,9 +20,7 @@ case class SceneMetrics(focal: Double, canvasW: Int, canvasH: Int) {
   val lowerLeft: Vec3  = origin - (horizontal / 2) - (vertical / 2) - Vec3(0, 0, focal)
 }
 
-class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable])(implicit
-    executor: ExecutionContext
-) extends LazyLogging {
+class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable]) extends LazyLogging {
 
   def gradientBackground(ray: Ray): Color3 = {
     val unitDir = ray.direction.unit
@@ -80,38 +78,46 @@ class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable])(implic
   private def randomMsaaOffsets(sampleCount: Int): Seq[(Double, Double)] =
     (0 until sampleCount).map(_ => (Random.nextDouble, Random.nextDouble))
 
-  private def threadedRender(pixelI: Int, pixelJ: Int): Future[(Int, Int, Color3)] = {
-    Future {
-      val samples = for (dij <- randomMsaaOffsets(msaaCount)) yield {
-        val (di, dj) = dij
-        val i        = pixelI + di
-        val j        = pixelJ + dj
-        val u        = i.toDouble / (metrics.canvasW - 1) // 0 => 1
-        val v        = j.toDouble / (metrics.canvasH - 1) // 0 => 1
-        val pixel    = metrics.lowerLeft + metrics.horizontal * u + metrics.vertical * v
-        val ray      = Ray(metrics.origin, pixel - metrics.origin)
-        rayColor(ray, 50)
-      }
-      (pixelI, pixelJ, Color3.mean(samples))
+  private def renderPixel(pixelI: Int, pixelJ: Int): Color3 = {
+    val samples = for (dij <- randomMsaaOffsets(msaaCount)) yield {
+      val (di, dj) = dij
+      val i        = pixelI + di
+      val j        = pixelJ + dj
+      val u        = i.toDouble / (metrics.canvasW - 1) // 0 => 1
+      val v        = j.toDouble / (metrics.canvasH - 1) // 0 => 1
+      val pixel    = metrics.lowerLeft + metrics.horizontal * u + metrics.vertical * v
+      val ray      = Ray(metrics.origin, pixel - metrics.origin)
+      rayColor(ray, 50)
+    }
+    Color3.mean(samples)
+  }
+
+  private def renderPixelThreaded(pixelI: Int, pixelJ: Int)(implicit
+      executionContext: ExecutionContext
+  ): Future[(Int, Int, Color3)] = {
+    Future((pixelI, pixelJ, renderPixel(pixelI, pixelJ)))
+  }
+
+  def renderCanvas(canvas: Graphics2D): Unit = {
+    for (pixelI <- 0 until metrics.canvasW; pixelJ <- 0 until metrics.canvasH) {
+      drawPixel(canvas, pixelI, pixelJ, renderPixel(pixelI, pixelJ))
     }
   }
 
-  def drawTo(canvas: Graphics2D): Unit = {
+  def renderCanvasThreaded(
+      canvas: Graphics2D
+  )(implicit executionContext: ExecutionContext): Unit = {
     val pixelsF: Seq[Future[(Int, Int, Color3)]] =
       for (pixelI <- 0 until metrics.canvasW; pixelJ <- 0 until metrics.canvasH) yield {
-        threadedRender(pixelI, pixelJ)
+        renderPixelThreaded(pixelI, pixelJ)
       }
 
-    val drawn = Future
-      .sequence(pixelsF)
-      .map(pixels =>
-        pixels.foreach(p => {
-          val (pixelI, pixelJ, color) = p;
-          drawPixel(canvas, pixelI, pixelJ, color)
-        })
-      )
+    val pixels = Await.result(Future.sequence(pixelsF), Duration(300, TimeUnit.SECONDS))
 
-    Await.result(drawn, Duration(300, TimeUnit.SECONDS))
+    pixels.foreach(p => {
+      val (pixelI, pixelJ, color) = p;
+      drawPixel(canvas, pixelI, pixelJ, color)
+    })
 
   }
 }
