@@ -14,10 +14,10 @@ class HitTestSpec extends AnyFlatSpec with Matchers {
     // 2 intersections
     val sphere = Sphere(Vec3(0, 1, 0), 1)
     sphere.hitBy(ray, -1, 1e6) shouldEqual Some(
-      HitRecord(Vec3(0, 0, 0), Vec3(0, -1, 0), 0, sphere))
+      HitRecord(Vec3(0, 0, 0), Vec3(0, -1, 0), 0))
 
     sphere.hitBy(ray, 0.01, 1e6) shouldEqual Some(
-      HitRecord(Vec3(0, 2, 0), Vec3(0, 1, 0), 2, sphere))
+      HitRecord(Vec3(0, 2, 0), Vec3(0, 1, 0), 2))
 
     sphere.hitBy(ray, 0.01, 1.99) shouldEqual None
   }
