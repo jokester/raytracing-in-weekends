@@ -22,10 +22,19 @@ class Scene(focal: Double, canvasW: Int, canvasH: Int, msaaLevel: Int, models: S
 
   lazy private val world = World(models)
 
-  def rayColor(ray: Ray): Color3 = {
+  def rayColor(ray: Ray, depth: Int): Color3 = {
+    if (depth < 0) return Color3(0, 0, 0)
+
     val hitWithSmallestT: Option[HitRecord] = world.hitBy(ray, 0, Double.MaxValue)
 
-    hitWithSmallestT.map(hit => normalColor(hit.normal)).getOrElse(gradientBackground(ray))
+    if (hitWithSmallestT.isEmpty) return gradientBackground(ray)
+
+    hitWithSmallestT
+      .map(hit => {
+        val reflectionTarget = hit.hitAt + hit.normal + Vec3.randomUnit()
+        rayColor(Ray(hit.hitAt, reflectionTarget), depth - 1)
+      })
+      .getOrElse(gradientBackground(ray))
   }
 
   def normalColor(normal: Vec3): Color3 = {
@@ -72,7 +81,7 @@ class Scene(focal: Double, canvasW: Int, canvasH: Int, msaaLevel: Int, models: S
         val v        = j.toDouble / (canvasH - 1) // 0 => 1
         val pixel    = lowerLeft + horizontal * u + vertical * v
         val ray      = Ray(origin, pixel - origin)
-        rayColor(ray)
+        rayColor(ray, 50)
       })
 
       drawPixel(
