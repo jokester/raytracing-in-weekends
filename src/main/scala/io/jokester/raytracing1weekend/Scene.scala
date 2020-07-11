@@ -4,7 +4,9 @@ import java.awt.Graphics2D
 
 import com.typesafe.scalalogging.LazyLogging
 
-class Scene(focal: Double, canvasW: Int, canvasH: Int, msaaLevel: Int, models: Seq[Hittable])
+import scala.util.Random
+
+class Scene(focal: Double, canvasW: Int, canvasH: Int, msaaCount: Int, models: Seq[Hittable])
     extends LazyLogging {
 
   def gradientBackground(ray: Ray): Color3 = {
@@ -56,9 +58,12 @@ class Scene(focal: Double, canvasW: Int, canvasH: Int, msaaLevel: Int, models: S
     canvas.drawRect(x, canvasH - 1 - y, 1, 1)
   }
 
-  private def genMsaaOffsets(t: Int): Seq[(Double, Double)] = {
+  private def fixedMsaaOffsets(t: Int): Seq[(Double, Double)] = {
     for (x <- 0 until t; y <- 0 until t) yield ((x + 1).toDouble / t, (y + 1).toDouble / t)
   }
+
+  private def randomMsaaOffsets(sampleCount: Int): Seq[(Double, Double)] =
+    (0 until sampleCount).map(_ => (Random.nextDouble, Random.nextDouble))
 
   def drawTo(canvas: Graphics2D): Unit = {
     val aspectRatio = canvasW.toDouble / canvasH
@@ -70,10 +75,8 @@ class Scene(focal: Double, canvasW: Int, canvasH: Int, msaaLevel: Int, models: S
     val vertical   = Vec3(0, viewportH, 0)
     val lowerLeft  = origin - (horizontal / 2) - (vertical / 2) - Vec3(0, 0, focal)
 
-    val sampleOffsets = genMsaaOffsets(msaaLevel)
-
     for (pixelI <- 0 until canvasW; pixelJ <- 0 until canvasH) {
-      val samples = sampleOffsets.map(dij => {
+      val samples = randomMsaaOffsets(msaaCount).map(dij => {
         val (di, dj) = dij
         val i        = pixelI + di
         val j        = pixelJ + dj
