@@ -20,9 +20,7 @@ case class Vec3(x: Double, val y: Double, val z: Double) {
   def cosTo(that: Vec3): Double = dot(that) / length / that.length
 }
 
-object Vec3 {
-
-}
+object Vec3 {}
 object VecOperators {
   case class WrappedDouble(d: Double) extends AnyVal {
     def *(v: Vec3): Vec3 = v * d

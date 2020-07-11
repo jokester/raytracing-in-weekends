@@ -4,7 +4,7 @@ import scala.util.Random
 
 object Threaded {
   private val _random: ThreadLocal[Random] = ThreadLocal.withInitial(() => new Random())
-  def random: Random = _random.get()
+  def random: Random                       = _random.get()
 
   @scala.annotation.tailrec
   def randomUnit(): Vec3 = {
@@ -20,6 +20,6 @@ object Threaded {
   private def randomDouble(min: Double, max: Double): Double =
     min + (max - min) * random.nextDouble()
 
-   def randomMsaaOffsets(sampleCount: Int): Seq[(Double, Double)] =
+  def randomMsaaOffsets(sampleCount: Int): Seq[(Double, Double)] =
     (0 until sampleCount).map(_ => (random.nextDouble, random.nextDouble))
 }
