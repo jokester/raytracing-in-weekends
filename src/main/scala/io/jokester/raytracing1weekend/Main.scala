@@ -24,18 +24,20 @@ object Main extends App with LazyLogging {
     )
   )
 
+  private val threadCount = Runtime.getRuntime.availableProcessors()
+
   private implicit val executionContext = ExecutionContext.fromExecutorService(
-    Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors())
+    Executors.newFixedThreadPool(threadCount)
   )
 
   logger.debug("rendering in 1 thread")
   ImageWriter.drawToFile(imgW, imgH, new File("out.png")) { scene.renderCanvas }
   logger.debug("rendering in 1 thread done")
 
-  logger.debug("rendering in threads")
+  logger.debug(s"rendering in ${threadCount} threads")
   ImageWriter.drawToFile(imgW, imgH, new File("out-threaded.png")) {
     scene.renderCanvasThreaded
   }
-  logger.debug("rendering in threads done")
+  logger.debug(s"rendering in ${threadCount} threads done")
 
 }
