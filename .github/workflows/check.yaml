@@ -20,7 +20,7 @@ jobs:
         path: |
           ~/.ivy2/cache
           ~/.sbt
-        key: ${{ runner.os }}-sbt-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/Dependencies.scala') }}
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/**/*') }}
 
     - name: Test
       run: sbt clean coverage test coverageReport
