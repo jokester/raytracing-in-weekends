@@ -30,15 +30,21 @@ object Main extends App with LazyLogging {
     Executors.newFixedThreadPool(threadCount)
   )
 
-  logger.debug("rendering in 1 thread")
-  ImageWriter.drawToFile(imgW, imgH, new File("out.png")) { scene.renderCanvas }
-  logger.debug("rendering in 1 thread done")
-
-  logger.debug(s"rendering in ${threadCount} threads")
-  ImageWriter.drawToFile(imgW, imgH, new File("out-threaded.png")) {
-    scene.renderCanvasThreaded
+  private def singleThreaded(): Unit = {
+    logger.debug("rendering in 1 thread")
+    ImageWriter.drawToFile(imgW, imgH, new File("out.png")) { scene.renderCanvas }
+    logger.debug("rendering in 1 thread done")
   }
-  logger.debug(s"rendering in ${threadCount} threads done")
+
+  private def multiThreaded(): Unit = {
+    logger.debug(s"rendering in ${threadCount} threads")
+    ImageWriter.drawToFile(imgW, imgH, new File("out.png")) {
+      scene.renderCanvasThreaded
+    }
+    logger.debug(s"rendering in ${threadCount} threads done")
+  }
+
+  multiThreaded()
 
   executionContext.shutdown()
 }
