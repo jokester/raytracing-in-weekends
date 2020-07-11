@@ -26,13 +26,19 @@ class Scene(focal: Double, canvasW: Int, canvasH: Int) extends LazyLogging {
   }
 
   def rayColor(ray: Ray): Color3 = {
-    val hitWithSmallestT: Option[HitRecord] = models
-      .flatMap(m => m.hitBy(ray, 0, Double.MaxValue))
-      .filter(_.t >= 0)
-      .sortBy(_.t)
-      .headOption
+    val world                               = World(models)
+    val hitWithSmallestT: Option[HitRecord] = world.hitBy(ray, 0, Double.MaxValue)
 
-    hitWithSmallestT.map(hit => hit.model.colorAt(hit)).getOrElse(gradientBackground(ray))
+    hitWithSmallestT.map(hit => normalColor(hit.normal)).getOrElse(gradientBackground(ray))
+  }
+
+  def normalColor(normal: Vec3): Color3 = {
+    val n = normal.unit
+    Color3(
+      (n.x + 1) / 2,
+      (n.y + 1) / 2,
+      (n.z + 1) / 2
+    )
   }
 
   /**

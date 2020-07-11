@@ -26,15 +26,16 @@ object Vec3 {
   @scala.annotation.tailrec
   def randomUnit(): Vec3 = {
     val r = Vec3(
-      randomDouble(-1,1),
-      randomDouble(-1,1),
-      randomDouble(-1,1),
+      randomDouble(-1, 1),
+      randomDouble(-1, 1),
+      randomDouble(-1, 1)
     )
     if (r.length < 1) r else randomUnit()
   }
 
   @inline
-  private def randomDouble(min: Double, max: Double): Double = min + (max - min) * Random.nextDouble()
+  private def randomDouble(min: Double, max: Double): Double =
+    min + (max - min) * Random.nextDouble()
 }
 object VecOperators {
   case class WrappedDouble(d: Double) extends AnyVal {
