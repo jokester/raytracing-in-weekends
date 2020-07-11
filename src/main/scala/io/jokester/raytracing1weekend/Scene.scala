@@ -4,13 +4,8 @@ import java.awt.Graphics2D
 
 import com.typesafe.scalalogging.LazyLogging
 
-class Scene(focal: Double, canvasW: Int, canvasH: Int, msaaLevel: Int) extends LazyLogging {
-  private var models = List.empty[Hittable]
-
-  def addModel(m: Hittable): this.type = {
-    models ::= m
-    this
-  }
+class Scene(focal: Double, canvasW: Int, canvasH: Int, msaaLevel: Int, models: Seq[Hittable])
+    extends LazyLogging {
 
   def gradientBackground(ray: Ray): Color3 = {
     val unitDir = ray.direction.unit
@@ -25,8 +20,9 @@ class Scene(focal: Double, canvasW: Int, canvasH: Int, msaaLevel: Int) extends L
     )
   }
 
+  lazy private val world = World(models)
+
   def rayColor(ray: Ray): Color3 = {
-    val world                               = World(models)
     val hitWithSmallestT: Option[HitRecord] = world.hitBy(ray, 0, Double.MaxValue)
 
     hitWithSmallestT.map(hit => normalColor(hit.normal)).getOrElse(gradientBackground(ray))
@@ -55,7 +51,7 @@ class Scene(focal: Double, canvasW: Int, canvasH: Int, msaaLevel: Int) extends L
     for (x <- 0 until t; y <- 0 until t) yield ((x + 1).toDouble / t, (y + 1).toDouble / t)
   }
 
-  def drawTo(canvas: Graphics2D) = {
+  def drawTo(canvas: Graphics2D): Unit = {
     val aspectRatio = canvasW.toDouble / canvasH
     val viewportH   = 2.0
     val viewportW   = viewportH * aspectRatio
