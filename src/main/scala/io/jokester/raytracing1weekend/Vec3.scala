@@ -1,7 +1,5 @@
 package io.jokester.raytracing1weekend
 
-import scala.util.Random
-
 case class Vec3(x: Double, val y: Double, val z: Double) {
   def +(that: Vec3): Vec3 = Vec3(x + that.x, y + that.y, z + that.z)
   def -(that: Vec3): Vec3 = Vec3(x - that.x, y - that.y, z - that.z)
@@ -23,19 +21,7 @@ case class Vec3(x: Double, val y: Double, val z: Double) {
 }
 
 object Vec3 {
-  @scala.annotation.tailrec
-  def randomUnit(): Vec3 = {
-    val r = Vec3(
-      randomDouble(-1, 1),
-      randomDouble(-1, 1),
-      randomDouble(-1, 1)
-    )
-    if (r.length < 1) r else randomUnit()
-  }
 
-  @inline
-  private def randomDouble(min: Double, max: Double): Double =
-    min + (max - min) * Random.nextDouble()
 }
 object VecOperators {
   case class WrappedDouble(d: Double) extends AnyVal {

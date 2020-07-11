@@ -46,7 +46,7 @@ class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable]) extend
 
     hitWithSmallestT
       .map(hit => {
-        val reflectionTarget = hit.hitAt + hit.normal + Vec3.randomUnit()
+        val reflectionTarget = hit.hitAt + hit.normal + Threaded.randomUnit()
         rayColor(Ray(hit.hitAt, reflectionTarget), depth - 1)
       })
       .getOrElse(gradientBackground(ray))
@@ -75,11 +75,8 @@ class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable]) extend
     for (x <- 0 until t; y <- 0 until t) yield ((x + 1).toDouble / t, (y + 1).toDouble / t)
   }
 
-  private def randomMsaaOffsets(sampleCount: Int): Seq[(Double, Double)] =
-    (0 until sampleCount).map(_ => (Random.nextDouble, Random.nextDouble))
-
   private def renderPixel(pixelI: Int, pixelJ: Int): Color3 = {
-    val samples = for (dij <- randomMsaaOffsets(msaaCount)) yield {
+    val samples = for (dij <- Threaded.randomMsaaOffsets(msaaCount)) yield {
       val (di, dj) = dij
       val i        = pixelI + di
       val j        = pixelJ + dj
