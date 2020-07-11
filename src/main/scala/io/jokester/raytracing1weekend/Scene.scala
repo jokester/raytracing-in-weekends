@@ -45,10 +45,19 @@ class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable]) extend
 
     hitWithSmallestT
       .map(hit => {
-        val reflectionTarget = hit.hitAt + hit.normal + Threaded.randomUnit()
-        rayColor(Ray(hit.hitAt, reflectionTarget - hit.hitAt), depth - 1) * 0.5
+        rayColor(nextRay1(hit), depth - 1) * 0.5
       })
       .getOrElse(gradientBackground(ray))
+  }
+
+  def nextRay1(hit: HitRecord): Ray = {
+    val reflectionTarget = hit.hitAt + hit.normal + Threaded.randomUnit()
+    Ray(hit.hitAt, reflectionTarget - hit.hitAt)
+  }
+
+  def nextRay2(hit: HitRecord): Ray = {
+    val reflectionTarget = hit.hitAt + Threaded.randomInHemisphere(hit.normal)
+    Ray(hit.hitAt, reflectionTarget - hit.hitAt)
   }
 
   def normalColor(normal: Vec3): Color3 = {

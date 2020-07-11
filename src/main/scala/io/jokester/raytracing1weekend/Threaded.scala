@@ -23,6 +23,15 @@ object Threaded {
     Vec3(r * Math.cos(a), r * Math.sin(a), z)
   }
 
+  def randomInHemisphere(normal: Vec3): Vec3 = {
+    val r = randomUnitSphere()
+    if (r.dot(normal) > 0) {
+      r
+    } else {
+      r * -1
+    }
+  }
+
   @inline
   private def randomDouble(min: Double, max: Double): Double =
     min + (max - min) * random.nextDouble()
