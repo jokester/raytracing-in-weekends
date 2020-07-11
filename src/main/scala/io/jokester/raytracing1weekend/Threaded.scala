@@ -19,7 +19,7 @@ object Threaded {
   def randomUnit(): Vec3 = {
     val a = randomDouble(0, Math.PI * 2)
     val z = randomDouble(-1, 1)
-    val r = Math.sqrt(1 - z*z)
+    val r = Math.sqrt(1 - z * z)
     Vec3(r * Math.cos(a), r * Math.sin(a), z)
   }
 

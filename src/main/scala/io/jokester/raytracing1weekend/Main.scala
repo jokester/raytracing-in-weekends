@@ -17,9 +17,9 @@ object Main extends App with LazyLogging {
       imgW,
       imgH
     ),
-    10,
+    100,
     Seq(
-      Sphere(Vec3(0, -0.1, -1), 0.5),
+      Sphere(Vec3(0, 0, -1), 0.5),
       Sphere(Vec3(0, -100.5, -1), 100)
     )
   )

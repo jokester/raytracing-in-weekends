@@ -21,6 +21,7 @@ case class Color3(r: Double, g: Double, b: Double) {
       Math.exp(Math.log(b) / gamma)
     )
 
+  def *(scale: Double): Color3 = copy(r * scale, g * scale, b * scale)
 }
 
 object Color3 {

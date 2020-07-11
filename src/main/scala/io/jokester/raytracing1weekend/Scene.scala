@@ -7,7 +7,6 @@ import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.Random
 
 case class SceneMetrics(focal: Double, canvasW: Int, canvasH: Int) {
   val aspectRatio: Double = canvasW.toDouble / canvasH
@@ -47,7 +46,7 @@ class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable]) extend
     hitWithSmallestT
       .map(hit => {
         val reflectionTarget = hit.hitAt + hit.normal + Threaded.randomUnit()
-        rayColor(Ray(hit.hitAt, reflectionTarget), depth - 1)
+        rayColor(Ray(hit.hitAt, reflectionTarget - hit.hitAt), depth - 1) * 0.5
       })
       .getOrElse(gradientBackground(ray))
   }
@@ -109,7 +108,7 @@ class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable]) extend
         renderPixelThreaded(pixelI, pixelJ)
       }
 
-    val pixels = Await.result(Future.sequence(pixelsF), Duration(300, TimeUnit.SECONDS))
+    val pixels = Await.result(Future.sequence(pixelsF), Duration(36000, TimeUnit.SECONDS))
 
     pixels.foreach(p => {
       val (pixelI, pixelJ, color) = p;
