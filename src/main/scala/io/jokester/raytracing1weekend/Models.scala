@@ -4,8 +4,15 @@ case class HitRecord(hitAt: Vec3, normal: Vec3, t: Double, model: Hittable)
 
 sealed trait Hittable {
   def hitBy(ray: Ray, tMin: Double, tMax: Double): Option[HitRecord]
+}
 
-  def colorAt(hitRecord: HitRecord): Color3
+case class World(val children: Seq[Hittable]) extends Hittable {
+  override def hitBy(ray: Ray, tMin: Double, tMax: Double): Option[HitRecord] =
+    children
+      .flatMap(m => m.hitBy(ray, 0, Double.MaxValue))
+      .filter(_.t >= 0)
+      .sortBy(_.t)
+      .headOption
 }
 
 case class Sphere(center: Vec3, radius: Double) extends Hittable {
@@ -38,14 +45,4 @@ case class Sphere(center: Vec3, radius: Double) extends Hittable {
         })
     }
   }
-
-  override def colorAt(hit: HitRecord): Color3 = {
-    val n = hit.normal.unit
-    Color3(
-      (n.x + 1) / 2,
-      (n.y + 1) / 2,
-      (n.z + 1) / 2
-    )
-  }
-
 }
