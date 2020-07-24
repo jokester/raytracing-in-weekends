@@ -22,9 +22,15 @@ case class Color3(r: Double, g: Double, b: Double) {
     )
 
   def *(scale: Double): Color3 = copy(r * scale, g * scale, b * scale)
+
+  /** color3 = Vec3 in C++ */
+  def *(that: Color3) = copy(r * that.r, g * that.g, b * that.b)
 }
 
 object Color3 {
+
+  lazy val black = Color3(0, 0, 0)
+
   def mean(samples: Seq[Color3]): Color3 = {
     val sumR = samples.map(_.r).sum
     val sumG = samples.map(_.g).sum
