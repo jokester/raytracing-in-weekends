@@ -41,11 +41,14 @@ class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable]) extend
 
     val hitWithSmallestT: Option[HitRecord] = world.hitBy(ray, 0.00001, Double.MaxValue)
 
-    if (hitWithSmallestT.isEmpty) return gradientBackground(ray)
-
     hitWithSmallestT
-      .map(hit => {
-        rayColor(nextRay1(hit), depth - 1) * 0.5
+      .map(hitRecord => {
+        hitRecord.material
+          .scatter(ray, hitRecord)
+          .map(scatterRecord => {
+            scatterRecord.attenuation * rayColor(scatterRecord.scattered, depth - 1)
+          })
+          .getOrElse(Color3.black)
       })
       .getOrElse(gradientBackground(ray))
   }
