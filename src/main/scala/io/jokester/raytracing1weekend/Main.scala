@@ -13,8 +13,8 @@ object Main extends App with LazyLogging {
 
   private val materialGround = Lambertian(Color3(0.8, 0.8, 0.0))
   private val materialCenter = Lambertian(Color3(0.7, 0.3, 0.3))
-  private val materialLeft   = Metal(Color3(0.8, 0.8, 0.8))
-  private val materialRight  = Metal(Color3(0.8, 0.6, 0.2))
+  private val materialLeft   = Metal(Color3(0.8, 0.8, 0.8), 0.3)
+  private val materialRight  = Metal(Color3(0.8, 0.6, 0.2), 1)
 
   private val scene = new Scene(
     SceneMetrics(
