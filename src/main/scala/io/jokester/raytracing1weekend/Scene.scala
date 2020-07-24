@@ -97,9 +97,9 @@ class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable]) extend
     Color3.mean(samples).gammaCorrection()
   }
 
-  private def renderPixelThreaded(pixelI: Int, pixelJ: Int)(implicit
-      executionContext: ExecutionContext
-  ): Future[(Int, Int, Color3)] = {
+  private def renderPixelThreaded(
+      pixelI: Int
+  )(pixelJ: Int)(implicit executionContext: ExecutionContext): Future[(Int, Int, Color3)] = {
     Future((pixelI, pixelJ, renderPixel(pixelI, pixelJ)))
   }
 
@@ -112,17 +112,20 @@ class Scene(metrics: SceneMetrics, msaaCount: Int, models: Seq[Hittable]) extend
   def renderCanvasThreaded(
       canvas: Graphics2D
   )(implicit executionContext: ExecutionContext): Unit = {
-    val pixelsF: Seq[Future[(Int, Int, Color3)]] =
-      for (pixelI <- 0 until metrics.canvasW; pixelJ <- 0 until metrics.canvasH) yield {
-        renderPixelThreaded(pixelI, pixelJ)
+    val pixelsF: Seq[Future[Seq[(Int, Int, Color3)]]] =
+      for (pixelI <- 0 until metrics.canvasW) yield {
+        Future {
+          for (pixelJ <- 0 until metrics.canvasH) yield {
+            (pixelI, pixelJ, renderPixel(pixelI, pixelJ))
+          }
+        }
       }
 
     val pixels = Await.result(Future.sequence(pixelsF), Duration(36000, TimeUnit.SECONDS))
 
-    pixels.foreach(p => {
-      val (pixelI, pixelJ, color) = p;
+    for (row <- pixels; cell <- row) {
+      val (pixelI, pixelJ, color) = cell;
       drawPixel(canvas, pixelI, pixelJ, color)
-    })
-
+    }
   }
 }
